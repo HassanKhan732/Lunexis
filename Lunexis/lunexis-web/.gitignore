@@ -1,0 +1,3 @@
+.venv/
+precompute/kernels/
+__pycache__/

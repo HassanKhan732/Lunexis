@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101513" />
+    <meta name="description" content="Compare Sun availability and Earth line of sight at lunar south pole sites using precomputed 2027 ephemeris data." />
+    <title>Lunexis | Lunar Site Conditions</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./src/styles.css" />
+    <script type="module" src="./src/main.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#top" aria-label="Lunexis home">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>LUNEXIS</span>
+      </a>
+      <div class="topbar-meta"><span class="live-dot"></span> LUNAR SOUTH POLE <span class="meta-divider">/</span> 2027 EPHEMERIS</div>
+      <div class="mode-switch" role="group" aria-label="Display mode">
+        <button id="simple-mode" class="mode-button is-active" type="button" aria-pressed="true">Simple</button>
+        <button id="advanced-mode" class="mode-button" type="button" aria-pressed="false">Advanced</button>
+      </div>
+    </header>
+
+    <main id="top" class="app-shell">
+      <section class="intro-row" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">MISSION PLANNING / SOUTH POLAR REGION</p>
+          <h1 id="page-title">Compare landing sites</h1>
+          <p class="intro-copy">Follow sunlight and Earth visibility across a lunar year.</p>
+        </div>
+        <div class="data-stamp"><span class="stamp-label">DATA WINDOW</span><strong>01 JAN — 31 DEC 2027</strong><span>Hourly · UTC</span></div>
+      </section>
+
+      <div id="load-error" class="load-error" role="alert" hidden></div>
+
+      <section class="workspace" aria-label="Site comparison workspace">
+        <aside class="selection-panel panel" aria-labelledby="selection-title">
+          <div class="panel-heading">
+            <div><p class="step-label">STEP 01</p><h2 id="selection-title">Choose sites</h2></div>
+            <span id="selection-count" class="count-badge">0 / 3</span>
+          </div>
+          <p class="panel-hint">Select up to three locations to compare.</p>
+          <div id="polar-map" class="polar-map" aria-label="Polar map of candidate lunar sites"></div>
+          <div class="map-caption"><span>80°S</span><span>Approximate coordinates · not terrain</span></div>
+          <div id="site-list" class="site-list" aria-label="Candidate sites"></div>
+          <div class="date-block">
+            <div class="date-heading"><div><p class="step-label">STEP 02</p><h3>Choose dates</h3></div><span class="date-limit">MAX 1 YEAR</span></div>
+            <div class="date-fields">
+              <label>Start date<input id="start-date" type="date" min="2027-01-01" max="2027-12-31" /></label>
+              <span class="date-arrow" aria-hidden="true">→</span>
+              <label>End date<input id="end-date" type="date" min="2027-01-01" max="2027-12-31" /></label>
+            </div>
+            <p id="date-error" class="field-error" role="status" aria-live="polite"></p>
+          </div>
+        </aside>
+
+        <section class="sky-panel panel" aria-labelledby="sky-title">
+          <div class="panel-heading sky-heading">
+            <div><p class="step-label">STEP 03 / SKY POSITION</p><h2 id="sky-title">Sky at <span id="active-site-name">—</span></h2></div>
+            <time id="current-time" class="current-time">—</time>
+          </div>
+          <div id="sky-view" class="sky-view" aria-live="polite"></div>
+          <div class="sky-legend"><span><i class="legend-sun"></i> Sun</span><span><i class="legend-earth"></i> Earth</span><span class="scale-note">Elevation shown on a 5× vertical scale</span></div>
+          <div class="time-controls">
+            <button id="play-button" class="play-button" type="button" aria-label="Play time animation" title="Play time animation"><span aria-hidden="true">▶</span></button>
+            <label class="speed-control">SPEED
+              <select id="play-speed" aria-label="Playback speed">
+                <option value="1">1×</option><option value="6">6×</option><option value="24">24×</option>
+              </select>
+            </label>
+            <input id="time-slider" class="time-slider" type="range" min="0" max="0" value="0" aria-label="Hour within selected date range" />
+            <output id="time-step" class="time-step" for="time-slider">1 / 1</output>
+          </div>
+          <p class="horizon-note"><span class="horizon-icon" aria-hidden="true">⌁</span> Flat horizon model <strong>Terrain not included</strong></p>
+        </section>
+
+        <aside class="scores-panel" aria-labelledby="scores-title">
+          <div class="score-heading"><div><p class="step-label">STEP 03B / SITE SCORES</p><h2 id="scores-title">Availability</h2></div><span id="score-period" class="score-period">—</span></div>
+          <div id="score-cards" class="score-cards"></div>
+          <div class="formula-note"><span class="formula-mark">%</span><p>Share of selected hours with a clear line of sight above the flat horizon.</p></div>
+        </aside>
+      </section>
+
+      <section class="timeline-section panel" aria-labelledby="timeline-title">
+        <div class="timeline-header">
+          <div><p class="step-label">STEP 04 / COMPARISON</p><h2 id="timeline-title">Whole period at a glance</h2><p id="timeline-detail" class="timeline-detail">One segment per hour</p></div>
+          <div class="timeline-legend" aria-label="Timeline state legend"><span><i class="state-both"></i>Both available</span><span><i class="state-one"></i>One available</span><span><i class="state-none"></i>Neither</span></div>
+        </div>
+        <div class="timeline-wrap">
+          <div id="timeline-labels" class="timeline-labels"></div>
+          <div class="timeline-plot-wrap">
+            <canvas id="timeline" tabindex="0" role="img" aria-label="Availability timeline. Use the time slider above to select an hour."></canvas>
+            <div id="timeline-tooltip" class="timeline-tooltip" role="status" hidden></div>
+            <div id="timeline-ticks" class="timeline-ticks"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="method-panel" class="method-panel panel" aria-labelledby="method-title">
+        <div class="method-heading"><div><p class="step-label">MODEL NOTES</p><h2 id="method-title">Data &amp; method</h2></div><button id="method-toggle" class="text-toggle" type="button" aria-expanded="false" aria-controls="method-content">Show notes <span aria-hidden="true">＋</span></button></div>
+        <div id="method-content" class="method-content" hidden>
+          <div><h3>Inputs</h3><p>Hourly 2027 apparent Sun and Earth azimuth/elevation from Skyfield, using JPL DE421, the NAIF lunar frame kernel and its DE421 orientation kernel. Site coordinates are approximate; observer height is 2 m.</p></div>
+          <div><h3>Visibility</h3><p>Power counts an hour when the Sun center elevation + 0.267° (solar angular radius) is above 0°. Earth link counts an hour when Earth center elevation is above 0°. Both use a flat horizon; terrain is not included.</p></div>
+          <div><h3>Data limits</h3><p>Coverage is 2027-01-01 00:00 through 2027-12-31 23:00 UTC. Results use hourly samples, so brief events between samples are not resolved. Coordinates and output are planning estimates, not navigation products.</p></div>
+          <p class="source-line">Sources: <a href="https://naif.jpl.nasa.gov/pub/naif/generic_kernels/" target="_blank" rel="noreferrer">NASA/JPL NAIF generic kernels</a> · <a href="https://rhodesmill.org/skyfield/" target="_blank" rel="noreferrer">Skyfield</a></p>
+        </div>
+      </section>
+    </main>
+    <footer class="page-footer"><span>LUNEXIS / LUNAR SOUTH POLE CONDITIONS</span><span>RESEARCH VISUALIZATION · NOT A FLIGHT PRODUCT</span></footer>
+  </body>
+</html>

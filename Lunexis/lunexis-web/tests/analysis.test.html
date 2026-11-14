@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lunexis calculation checks</title>
+    <style>
+      body { max-width: 760px; margin: 40px auto; padding: 0 20px; color: #eaf0e9; background: #101513; font: 15px/1.6 "Segoe UI", sans-serif; }
+      h1 { font-size: 24px; }
+      li { margin: 6px 0; }
+      .pass { color: #4ade80; }
+      .fail { color: #ff9a79; }
+      code { color: #c9ef72; }
+    </style>
+  </head>
+  <body>
+    <h1>Lunexis calculation checks</h1>
+    <p>Dependency-free checks for the calculation and date-range helpers.</p>
+    <ol id="results" aria-live="polite"></ol>
+    <script type="module">
+      import {
+        DATA_START_UTC,
+        HOUR_MS,
+        computeMetrics,
+        hourState,
+        indexForDate,
+        longestRun,
+        mostCommonState,
+      } from "../src/analysis.js";
+
+      const results = document.querySelector("#results");
+      let failures = 0;
+
+      function check(name, condition) {
+        const item = document.createElement("li");
+        item.className = condition ? "pass" : "fail";
+        item.textContent = `${condition ? "PASS" : "FAIL"} ${name}`;
+        results.append(item);
+        if (!condition) failures += 1;
+      }
+
+      const sample = {
+        sunEl: [-30, -26, 10, -10, -10],
+        earthEl: [0, 1, -1, 1, 1],
+      };
+      const metrics = computeMetrics(sample, 0, 4);
+      check("Power uses the 0.267 degree solar disc and returns 80%", metrics.powerPercent === 80);
+      check("Earth link uses center elevation > 0 and returns 60%", metrics.earthLinkPercent === 60);
+      check("Both available percentage is 60%", metrics.bothPercent === 60);
+      check("Longest darkness is one consecutive hour", metrics.longestDarknessHours === 1);
+      check("Longest Earth outage is one consecutive hour", metrics.longestOutageHours === 1);
+      check("A sample exactly at zero elevation is below the flat horizon", hourState(sample, 0) === 0);
+      check("Sun-disc radius makes a center 0.26 degrees below the horizon visible", hourState(sample, 1) === 2);
+      check("Longest-run helper counts consecutive unavailable samples", longestRun([false, false, true, false], false) === 2);
+
+      const singleHour = computeMetrics(sample, 2, 2);
+      check("A one-hour selection has valid metrics", singleHour.totalHours === 1 && singleHour.powerPercent === 100 && singleHour.earthLinkPercent === 0);
+      check("First 2027 hour maps to index zero", indexForDate("2027-01-01") === 0);
+      check("Last 2027 hour maps to index 8759", indexForDate("2027-12-31", true) === 8759);
+      check("Hour indexes correspond to UTC timestamps", DATA_START_UTC + 8759 * HOUR_MS === Date.UTC(2027, 11, 31, 23));
+      check("Timeline aggregation selects the most common state", mostCommonState(sample, 0, 4) === 2);
+
+      const summary = document.createElement("p");
+      summary.id = "summary";
+      summary.textContent = failures === 0 ? "All 13 checks passed." : `${failures} check(s) failed.`;
+      summary.className = failures === 0 ? "pass" : "fail";
+      document.body.append(summary);
+      document.title = failures === 0 ? "PASS · Lunexis calculation checks" : "FAIL · Lunexis calculation checks";
+    </script>
+  </body>
+</html>
