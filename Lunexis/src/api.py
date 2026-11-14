@@ -1,11 +1,11 @@
 ﻿from flask import Flask, jsonify
 
-from src.data.catalog import list_items
+from src.services.health import get_health
 from src.services.reporting import build_report
 
 
 def health() -> dict:
-    return {"status": "ok", "items": list_items()}
+    return get_health()
 
 
 def create_app() -> Flask:
@@ -13,7 +13,7 @@ def create_app() -> Flask:
 
     @app.get("/health")
     def health_route():
-        return jsonify(health())
+        return jsonify(get_health())
 
     @app.get("/reports")
     def reports_route():

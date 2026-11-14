@@ -1,6 +1,6 @@
 ﻿# Changelog
 
 ## Unreleased
-- Added the initial project structure.
-- Added Python entrypoints and modules.
-- Added project automation and tests.
+- Exposed health and report services through Flask endpoints.
+- Added `.env` configuration for application identity, logging, and server binding.
+- Added reproducible development dependencies and service/API tests.

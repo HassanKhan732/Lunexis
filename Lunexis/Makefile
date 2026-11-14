@@ -1,7 +1,10 @@
-﻿.PHONY: run test
+﻿.PHONY: install-dev run test
+
+install-dev:
+	python -m pip install -r requirements-dev.txt
 
 run:
-python -m src.app
+	python -m src.app
 
 test:
-pytest -q
+	python -m pytest -q
