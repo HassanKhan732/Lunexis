@@ -1,3 +1,4 @@
+// Portions of this file were written with AI assistance.
 import {
   DATA_START_UTC,
   HOUR_MS,

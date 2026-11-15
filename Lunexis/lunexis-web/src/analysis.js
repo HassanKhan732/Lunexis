@@ -1,3 +1,4 @@
+// Portions of this file were written with AI assistance.
 export const DATA_START_UTC = Date.UTC(2027, 0, 1, 0);
 export const HOUR_MS = 60 * 60 * 1000;
 export const HOURS_PER_DAY = 24;
