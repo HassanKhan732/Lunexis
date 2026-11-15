@@ -42,8 +42,9 @@ const SITE_SHORT_NAMES = {
 const state = {
   sites: [],
   data: new Map(),
-  selectedIds: ["shackleton", "malapert", "haworth"],
-  activeId: "shackleton",
+  // Default selection on first load (written with AI assistance).
+  selectedIds: ["malapert", "shackleton"],
+  activeId: "malapert",
   startIndex: 0,
   endIndex: 29 * HOURS_PER_DAY + 23,
   hourIndex: 0,
